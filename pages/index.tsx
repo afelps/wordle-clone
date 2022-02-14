@@ -1,20 +1,17 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Board from "../components/Board";
-import Keyboard from "../components/Keyboard";
+import { EndModal } from "../components/EndModal";
 import GameBox from "../components/GameBox";
-import Modal from "../components/Modal";
-import { Guess, LetterMap, LetterState } from "../interfaces";
-import {
-  initLetterMap,
-  getRandomPossibleWord,
-  isWordPossible,
-  getCharCount,
-} from "../utils";
-import LosePanel from "../components/LosePanel";
-import { setTimeout } from "timers";
+import Keyboard from "../components/Keyboard";
 import MessageDisplay from "../components/MessageDisplay";
 import useTimedState from "../hooks/useTimedState";
-import { EndModal } from "../components/EndModal";
+import { Guess, LetterMap, LetterState } from "../interfaces";
+import {
+  getCharCount,
+  getRandomPossibleWord,
+  initLetterMap,
+  isWordPossible,
+} from "../utils";
 
 const IndexPage = () => {
   const chances = 6;

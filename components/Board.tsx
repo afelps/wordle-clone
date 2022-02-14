@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Guess, LetterState } from "../interfaces";
+import React from "react";
+import { Guess } from "../interfaces";
 import LetterRow from "./LetterRow";
 
 type Props = {

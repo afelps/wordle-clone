@@ -1,4 +1,4 @@
-import React, { PropsWithChildren, useContext } from "react";
+import React, { PropsWithChildren } from "react";
 import { LetterState } from "../interfaces";
 
 type Props = {

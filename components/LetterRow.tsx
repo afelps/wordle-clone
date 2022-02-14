@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 import { GameContext } from "../contexts/GameContext";
-import { Guess, GuessLetter, LetterState } from "../interfaces";
+import { Guess, LetterState } from "../interfaces";
 import Letter from "./Letter";
 
 type Props = {
