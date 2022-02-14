@@ -37,7 +37,7 @@ const KeyBox = ({
 
   return (
     <div
-      className={`w-fit flex flex-col justify-center px-3 h-10 m-1 hover:shadow-md active:shadow-sm rounded ${stateStyle}`}
+      className={`w-fit flex flex-col justify-center px-2 h-10 m-1 hover:shadow-md active:shadow-sm rounded ${stateStyle}`}
       onClick={() => onClick()}
     >
       {children}

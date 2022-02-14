@@ -113,7 +113,10 @@ const IndexPage = () => {
   };
 
   return (
-    <GameBox context={{ letterMap: letterMap, word: word }}>
+    <GameBox
+      context={{ letterMap: letterMap, word: word }}
+      title="Wordle Clone"
+    >
       <Board guesses={guesses.map(([value, setter]) => value)} />
       <Keyboard
         onNewKey={handleNewKey}

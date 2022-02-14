@@ -44,7 +44,7 @@ const Keyboard = ({ onNewKey, onBackspace, onSubmit, enabled }: Props) => {
 };
 
 const KeyContainer = ({ children }: PropsWithChildren<{}>) => (
-  <div className=" flex flex-col p-5 mt-5">{children}</div>
+  <div className=" flex flex-col mt-5">{children}</div>
 );
 
 const KeyRow = ({ children }: PropsWithChildren<{}>) => (
