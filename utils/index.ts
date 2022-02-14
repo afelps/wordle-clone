@@ -18,4 +18,8 @@ const getRandomPossibleWord = () => {
   return candidateWords[index];
 };
 
-export { initLetterMap, isWordPossible, getRandomPossibleWord };
+const getCharCount = (word: string, char: string): number => {
+  return word.split(char).length - 1;
+};
+
+export { initLetterMap, isWordPossible, getRandomPossibleWord, getCharCount };

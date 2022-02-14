@@ -4,65 +4,73 @@ import Keyboard from "../components/Keyboard";
 import GameBox from "../components/GameBox";
 import Modal from "../components/Modal";
 import { Guess, LetterMap, LetterState } from "../interfaces";
-import { initLetterMap, getRandomPossibleWord, isWordPossible } from "../utils";
-import WinPanel from "../components/WinPanel";
+import {
+  initLetterMap,
+  getRandomPossibleWord,
+  isWordPossible,
+  getCharCount,
+} from "../utils";
 import LosePanel from "../components/LosePanel";
 import { setTimeout } from "timers";
 import MessageDisplay from "../components/MessageDisplay";
+import useTimedState from "../hooks/useTimedState";
+import { EndModal } from "../components/EndModal";
 
 const IndexPage = () => {
   const chances = 6;
-  const errorTime = 2000;
 
   const [letterMap, setLetterMap] = useState<LetterMap>(initLetterMap());
-  // const [word, setWord] = useState<string>(getRandomPossibleWord());
-  const [word, setWord] = useState<string>("geeks");
+  const [word, setWord] = useState<string>(getRandomPossibleWord());
   const [gameEnded, setGameEnded] = useState<boolean>(false);
-  const [won, setWon] = useState<boolean>(false);
-  const [errorDisplay, setErrorDisplay] = useState<string>("");
-
-  useEffect(() => {
-    setTimeout(setErrorDisplay, errorTime, "");
-  }, [errorDisplay]);
-
-  useEffect(() => {
-    console.log("Word: ", word);
-  }, [word]);
+  const [win, setWon] = useState<boolean>(false);
+  const [errorDisplay, setErrorDisplay] = useTimedState<string>("", 3000);
 
   const guesses = Array(chances)
     .fill(null)
     .map((_, i) => useState<Guess>({ data: [], active: i == 0 }));
 
-  const verifyLetter = (letter: string, index: number) => {
-    let state = LetterState.Unknown;
-    const occurenceCount = () => {
-      const letterLess = word.replace(letter, "");
-      return word.length - letterLess.length;
-    };
-    if (letter == word.charAt(index)) state = LetterState.Correct;
-    else if (word.includes(letter) && occurenceCount())
-      //todo: fix this
-      state = LetterState.Used;
-    else state = LetterState.NotUsed;
-    letterMap[letter] = state;
-    setLetterMap({ ...letterMap });
-    return state;
-  };
-
   const handleSubmit = () => {
+    const validateGuess = (guess: Guess) => {
+      if (guess.data.length != word.length) {
+        setErrorDisplay("Complete the word");
+        return true; // break
+      } else if (!isWordPossible(guess.data.map((v) => v.char).join(""))) {
+        setErrorDisplay("Not a word");
+        return true;
+      }
+    };
+    const getUpdatedStates = (guess: Guess) => {
+      const guessWord = guess.data.map((v) => v.char).join("");
+      return guess.data.map(({ char }, i) => {
+        let state = LetterState.Unknown;
+
+        if (char == word.charAt(i)) {
+          state = LetterState.Correct;
+        } else if (word.includes(char)) {
+          //Handle double lettered guess
+          const hasMoreOfCharThanWord =
+            getCharCount(guessWord, char) > getCharCount(word, char);
+          const isLastGuessOccurrence = guessWord.lastIndexOf(char) == i;
+          if (!isLastGuessOccurrence && hasMoreOfCharThanWord) {
+            state = LetterState.NotUsed;
+          } else {
+            state = LetterState.Used;
+          }
+        } else {
+          state = LetterState.NotUsed;
+        }
+
+        letterMap[char] = state;
+        setLetterMap({ ...letterMap });
+        return { char: char, state: state };
+      });
+    };
+
     guesses.some(([value, setter], i) => {
       //update active guess letter states and inactivate it
       if (value.active) {
-        if (value.data.length != word.length) {
-          setErrorDisplay("Complete the word");
-          return true; // break
-        } else if (!isWordPossible(value.data.map((v) => v.char).join(""))) {
-          setErrorDisplay("Not a word");
-          return true;
-        }
-        const data = value.data.map(({ char, state }, i) => {
-          return { char: char, state: verifyLetter(char, i) };
-        });
+        if (validateGuess(value)) return true; // break
+        const data = getUpdatedStates(value);
         if (data.every((v) => v.state == LetterState.Correct)) {
           setWon(true);
           setGameEnded(true);
@@ -75,7 +83,7 @@ const IndexPage = () => {
         return true; // break;
       }
       return false;
-    }) || setGameEnded(true);
+    }) || setGameEnded(true); //Ends game on no active guesses
   };
 
   const handleNewKey = (newKey) => {
@@ -108,10 +116,7 @@ const IndexPage = () => {
   };
 
   return (
-    <GameBox
-      title="Wordle Clone"
-      context={{ letterMap: letterMap, word: word }}
-    >
+    <GameBox context={{ letterMap: letterMap, word: word }}>
       <Board guesses={guesses.map(([value, setter]) => value)} />
       <Keyboard
         onNewKey={handleNewKey}
@@ -119,14 +124,13 @@ const IndexPage = () => {
         onSubmit={handleSubmit}
         enabled={!gameEnded}
       />
-      <Modal show={gameEnded} onExit={handleRestart}>
-        {won ? (
-          <WinPanel guesses={guesses.map(([v, s]) => v)} />
-        ) : (
-          <LosePanel />
-        )}
-      </Modal>
-      {errorDisplay && <MessageDisplay text={errorDisplay} />}
+      <EndModal
+        show={gameEnded}
+        guesses={guesses.map(([v, s]) => v)}
+        onExit={handleRestart}
+        win={win}
+      />
+      <MessageDisplay text={errorDisplay} />
     </GameBox>
   );
 };
